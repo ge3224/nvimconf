@@ -208,23 +208,33 @@ return {
       -- But for many setups, the LSP (`tsserver`) will work just fine
       -- tsserver = {},
       --
-      denols = {
-        filetypes = { "typescript", "typescriptreact" },
-        root_dir = require("lspconfig.util").root_pattern("deno.json", "deno.jsonc"),
-      },
       ts_ls = {
-        filetypes = { "typescript", "typescriptreact" },
-        root_dir = function(fname)
-          -- Check if deno config exists
-          local deno_root = require("lspconfig.util").root_pattern("deno.json", "deno.jsonc")(fname)
-          if deno_root then
-            return nil -- Don't attach tsserver if deno config exists
-          end
-          -- Otherwise, look for package.json
-          return require("lspconfig.util").root_pattern "package.json"(fname)
-        end,
+        root_dir = require("lspconfig").util.root_pattern { "package.json", "tsconfig.json" },
         single_file_support = false,
+        settings = {},
       },
+      -- ts_ls = {
+      --   filetypes = { "typescript", "typescriptreact" },
+      --   root_dir = function(fname)
+      --     -- Check if deno config exists
+      --     local deno_root = require("lspconfig.util").root_pattern("deno.json", "deno.jsonc")(fname)
+      --     if deno_root then
+      --       return nil -- Don't attach tsserver if deno config exists
+      --     end
+      --     -- Otherwise, look for package.json
+      --     return require("lspconfig.util").root_pattern "package.json"(fname)
+      --   end,
+      --   single_file_support = false,
+      -- },
+      denols = {
+        root_dir = require("lspconfig").util.root_pattern { "deno.json", "deno.jsonc" },
+        single_file_support = false,
+        settings = {},
+      },
+      -- denols = {
+      --   filetypes = { "typescript", "typescriptreact" },
+      --   root_dir = require("lspconfig.util").root_pattern("deno.json", "deno.jsonc"),
+      -- },
       lua_ls = {
         -- cmd = {...},
         -- filetypes = { ...},

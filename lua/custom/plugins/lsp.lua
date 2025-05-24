@@ -41,6 +41,23 @@ return {
     -- If you're wondering about lsp vs treesitter, you can check out the wonderfully
     -- and elegantly composed help section, `:help lsp-vs-treesitter`
 
+    -- https://vi.stackexchange.com/questions/46572/automatically-detach-lsp-based-on-buffer-file-context
+    local custom_lsp_disables = function(event)
+      local client = vim.lsp.get_client_by_id(event.data.client_id)
+      local is_deno_project = function()
+        local buf_dir = vim.fn.expand "%:p:h"
+        local found_dir = require("lspconfig").util.root_pattern("deno.json", "deno.jsonc", "deno.lock")(buf_dir)
+        vim.print("found: " .. (found_dir or "(nil)"))
+        if found_dir then
+          return true
+        end
+        return false
+      end
+      if (client.name == "ts_ls" and is_deno_project()) or (client.name == "denols" and not is_deno_project()) then
+        vim.lsp.buf_detach_client(event.buf, event.data.client_id)
+      end
+    end
+
     --  This function gets run when an LSP attaches to a particular buffer.
     --    That is to say, every time a new file is opened that is associated with
     --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
@@ -48,6 +65,7 @@ return {
     vim.api.nvim_create_autocmd("LspAttach", {
       group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
       callback = function(event)
+        custom_lsp_disables(event)
         -- NOTE: Remember that Lua is a real programming language, and as such it is possible
         -- to define small helper and utility functions so you don't have to repeat yourself.
         --
@@ -215,16 +233,7 @@ return {
         settings = {},
       },
       denols = {
-        function()
-          -- Only attach if a Deno root marker is found in the upward search.
-          local deno_root = vim.fs.find({ "deno.json", "deno.jsonc" }, { upward = true })[1]
-          if deno_root then
-            return vim.fn.fnamemodify(deno_root, ":h") -- Return the directory containing the deno config
-          else
-            return nil
-          end
-        end,
-        -- root_dir = require("lspconfig").util.root_pattern { "deno.json", "deno.jsonc" },
+        root_dir = require("lspconfig").util.root_pattern { "deno.json", "deno.jsonc" },
         single_file_support = false,
         settings = {},
       },

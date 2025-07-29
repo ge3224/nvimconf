@@ -626,6 +626,24 @@ require('lazy').setup({
         end,
       })
 
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
+        group = vim.api.nvim_create_augroup('kickstart-ts-ls-attach', { clear = true }),
+        callback = function(event)
+          local util = require 'lspconfig.util'
+          local root_dir = util.root_pattern('deno.json', 'deno.jsonc')(vim.api.nvim_buf_get_name(event.buf))
+          if root_dir then
+            vim.lsp.start { name = 'denols', cmd = { 'deno', 'lsp' }, root_dir = root_dir }
+          else
+            vim.lsp.start {
+              name = 'ts_ls',
+              cmd = { 'typescript-language-server', '--stdio' },
+              root_dir = util.root_pattern('package.json', 'tsconfig.json')(vim.api.nvim_buf_get_name(event.buf)),
+            }
+          end
+        end,
+      })
+
       -- Diagnostic Config
       -- See :help vim.diagnostic.Opts
       vim.diagnostic.config {
@@ -698,6 +716,25 @@ require('lazy').setup({
             },
           },
         },
+
+        ts_ls = {
+          settings = {},
+        },
+
+        denols = {
+          settings = {
+            deno = {
+              enable = true,
+              suggest = {
+                imports = {
+                  hosts = {
+                    ['https://deno.land'] = true,
+                  },
+                },
+              },
+            },
+          },
+        },
       }
 
       -- Ensure the servers and tools above are installed
@@ -720,8 +757,9 @@ require('lazy').setup({
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       require('mason-lspconfig').setup {
-        ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
-        automatic_installation = false,
+        ensure_installed = { 'lua_ls', 'ts_ls', 'denols' },
+        automatic_enable = false,
+        -- automatic_installation = { exclude = { 'denols', 'ts_ls' } },
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}

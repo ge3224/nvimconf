@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -694,7 +694,7 @@ require('lazy').setup({
         gopls = {},
         pyright = {},
         rust_analyzer = {},
-        
+
         -- These are listed here for installation but excluded from automatic setup
         -- They're handled by the FileType autocmd below
         ts_ls = {},
@@ -738,7 +738,7 @@ require('lazy').setup({
       require('mason-lspconfig').setup {
         ensure_installed = vim.tbl_keys(servers), -- Install all servers in the servers table
         automatic_enable = {
-          exclude = { 'ts_ls', 'denols' } -- Exclude these from automatic setup
+          exclude = { 'ts_ls', 'denols' }, -- Exclude these from automatic setup
         },
         handlers = {
           function(server_name)

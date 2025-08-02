@@ -522,6 +522,24 @@ require('lazy').setup({
       --    That is to say, every time a new file is opened that is associated with
       --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
       --    function will be executed to configure the current buffer
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
+        group = vim.api.nvim_create_augroup('kickstart-ts-ls-attach', { clear = true }),
+        callback = function(event)
+          local util = require 'lspconfig.util'
+          local root_dir = util.root_pattern('deno.json', 'deno.jsonc')(vim.api.nvim_buf_get_name(event.buf))
+          if root_dir then
+            vim.lsp.start { name = 'denols', cmd = { 'deno', 'lsp' }, root_dir = root_dir }
+          else
+            vim.lsp.start {
+              name = 'ts_ls',
+              cmd = { 'typescript-language-server', '--stdio' },
+              root_dir = util.root_pattern('package.json', 'tsconfig.json')(vim.api.nvim_buf_get_name(event.buf)),
+            }
+          end
+        end,
+      })
+
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
@@ -671,18 +689,16 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
-        -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
-        --
+        -- Enable these language servers with automatic setup
+        clangd = {},
+        gopls = {},
+        pyright = {},
+        rust_analyzer = {},
+        
+        -- These are listed here for installation but excluded from automatic setup
+        -- They're handled by the FileType autocmd below
+        ts_ls = {},
+        denols = {},
 
         lua_ls = {
           -- cmd = { ... },
@@ -720,8 +736,10 @@ require('lazy').setup({
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       require('mason-lspconfig').setup {
-        ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
-        automatic_installation = false,
+        ensure_installed = vim.tbl_keys(servers), -- Install all servers in the servers table
+        automatic_enable = {
+          exclude = { 'ts_ls', 'denols' } -- Exclude these from automatic setup
+        },
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}

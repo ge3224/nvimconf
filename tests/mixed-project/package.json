@@ -1,5 +1,0 @@
-{
-  "name": "mixed-project",
-  "version": "1.0.0",
-  "description": "Project with both package.json and deno.json"
-}

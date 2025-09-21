@@ -8,7 +8,7 @@ return {
       'nvim-lua/plenary.nvim',
     },
     config = function()
-      require('obsidian').setup({
+      require('obsidian').setup {
         workspaces = {
           {
             name = 'personal',
@@ -19,37 +19,49 @@ return {
           enable = false,
         },
         mappings = {
-          ["gf"] = {
+          ['gf'] = {
             action = function()
-              if vim.bo.filetype == "markdown" then
-                return require("obsidian").util.gf_passthrough()
+              if vim.bo.filetype == 'markdown' then
+                return require('obsidian').util.gf_passthrough()
               else
-                return "gf"
+                return 'gf'
               end
             end,
             opts = { noremap = false, expr = true, buffer = true },
           },
-          ["<cr>"] = {
+          ['<cr>'] = {
             action = function()
-              return "<cr>"
+              return '<cr>'
             end,
             opts = { expr = true, buffer = true },
           },
         },
-      })
+      }
     end,
   },
   {
-    'iamcco/markdown-preview.nvim',
-    cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
-    build = 'cd app && npm install',
-    init = function()
-      vim.g.mkdp_filetypes = { 'markdown' }
-    end,
+    'MeanderingProgrammer/render-markdown.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' },
     ft = { 'markdown' },
+    opts = {},
+    config = function()
+      require('render-markdown').setup {
+        code = {
+          sign = false,
+          width = 'block',
+          right_pad = 1,
+        },
+        heading = {
+          sign = false,
+          icons = { '󰉫 ', '󰉬 ', '󰉭 ', '󰉮 ', '󰉯 ', '󰉰 ' },
+        },
+      }
+      -- Toggle keybinding for render/raw mode
+      vim.keymap.set('n', '<leader>mt', ':RenderMarkdown toggle<CR>', { desc = 'Toggle markdown rendering' })
+    end,
   },
   {
-    dir = vim.fn.stdpath('config'),
+    dir = vim.fn.stdpath 'config',
     name = 'markdown-settings',
     config = function()
       -- Markdown-specific settings

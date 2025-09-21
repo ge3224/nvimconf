@@ -18,6 +18,24 @@ return {
         ui = {
           enable = false,
         },
+        mappings = {
+          ["gf"] = {
+            action = function()
+              if vim.bo.filetype == "markdown" then
+                return require("obsidian").util.gf_passthrough()
+              else
+                return "gf"
+              end
+            end,
+            opts = { noremap = false, expr = true, buffer = true },
+          },
+          ["<cr>"] = {
+            action = function()
+              return "<cr>"
+            end,
+            opts = { expr = true, buffer = true },
+          },
+        },
       })
     end,
   },

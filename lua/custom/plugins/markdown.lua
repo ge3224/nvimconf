@@ -46,6 +46,7 @@ return {
     opts = {},
     config = function()
       require('render-markdown').setup {
+        enabled = false,
         code = {
           sign = false,
           width = 'block',

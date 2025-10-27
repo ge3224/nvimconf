@@ -948,11 +948,30 @@ require('lazy').setup({
       require('mini.ai').setup { n_lines = 500 }
 
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
+      -- Using vim-surround style mappings for core operations:
+      -- - ysiw) - [Y]ank [S]urround [I]nner [W]ord [)]Paren
+      -- - ds'   - [D]elete [S]urround [']quotes
+      -- - cs)'  - [C]hange [S]urround [)] [']
       --
-      -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
-      -- - sd'   - [S]urround [D]elete [']quotes
-      -- - sr)'  - [S]urround [R]eplace [)] [']
-      require('mini.surround').setup()
+      -- Plus mini.surround extras with gs prefix:
+      -- - gsf)  - Find next ) surrounding
+      -- - gsF)  - Find previous ) surrounding
+      -- - gsh)  - Highlight ) surrounding
+      -- - gsn   - Update search lines config
+      require('mini.surround').setup({
+        mappings = {
+          add = 'ys',            -- Add surrounding in Normal and Visual modes
+          delete = 'ds',         -- Delete surrounding
+          find = 'gsf',          -- Find surrounding (to the right)
+          find_left = 'gsF',     -- Find surrounding (to the left)
+          highlight = 'gsh',     -- Highlight surrounding
+          replace = 'cs',        -- Replace surrounding
+          update_n_lines = 'gsn', -- Update `n_lines`
+
+          suffix_last = 'l',     -- Suffix to search with "prev" method
+          suffix_next = 'n',     -- Suffix to search with "next" method
+        },
+      })
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,

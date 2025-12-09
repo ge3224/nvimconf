@@ -158,25 +158,17 @@ local function get_book_id(book_input)
   return nil
 end
 
--- Load Bible data from JSON file (once at startup)
+-- Load Bible data from Lua file (once at startup)
 local bible_data = nil
 local function load_bible_data()
   if bible_data then
     return bible_data
   end
 
-  local data_path = vim.fn.stdpath('config') .. '/plugin/bible-data.json'
-  local file = io.open(data_path, 'r')
-  if not file then
-    return nil, 'Failed to open bible-data.json'
-  end
-
-  local content = file:read('*all')
-  file:close()
-
-  local ok, data = pcall(vim.fn.json_decode, content)
+  local data_path = vim.fn.stdpath('config') .. '/plugin/bible-data.lua'
+  local ok, data = pcall(dofile, data_path)
   if not ok or not data then
-    return nil, 'Failed to parse bible-data.json'
+    return nil, 'Failed to load bible-data.lua: ' .. tostring(data)
   end
 
   bible_data = data
@@ -197,19 +189,19 @@ local function get_chapter_info(book_name, chapter_num)
   end
 
   -- Calculate book number from c_id
-  local book_number = tostring(c_id - 1001070104)
-  local chapter_str = tostring(chapter_num)
+  local book_number = c_id - 1001070104
+  local chapter_num_int = tonumber(chapter_num)
 
   -- Look up in data
   if not data[book_number] then
     return nil, 'Book ' .. book_number .. ' not found in data'
   end
 
-  if not data[book_number][chapter_str] then
-    return nil, 'Chapter ' .. chapter_str .. ' not found in book ' .. book_number
+  if not data[book_number][chapter_num_int] then
+    return nil, 'Chapter ' .. chapter_num_int .. ' not found in book ' .. book_number
   end
 
-  return data[book_number][chapter_str]
+  return data[book_number][chapter_num_int]
 end
 
 -- Function to generate the numbered links
@@ -231,9 +223,9 @@ local function generate_numbered_links()
     return
   end
 
-  -- Use data directly from JSON
-  local count = chapter_info.count
-  local v_id = chapter_info.first_verse_id
+  -- Use data directly from Lua table (format: {count, first_verse_id})
+  local count = chapter_info[1]
+  local v_id = chapter_info[2]
 
   vim.notify(
     string.format('Generating %d verses starting from ID %d', count, v_id),

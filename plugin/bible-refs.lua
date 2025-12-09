@@ -158,59 +158,58 @@ local function get_book_id(book_input)
   return nil
 end
 
--- Cache for scraped chapter data
-local chapter_cache = {}
+-- Load Bible data from JSON file (once at startup)
+local bible_data = nil
+local function load_bible_data()
+  if bible_data then
+    return bible_data
+  end
 
--- Function to scrape verse information from JW.org
-local function scrape_chapter_info(book_name, chapter_num)
+  local data_path = vim.fn.stdpath('config') .. '/plugin/bible-data.json'
+  local file = io.open(data_path, 'r')
+  if not file then
+    return nil, 'Failed to open bible-data.json'
+  end
+
+  local content = file:read('*all')
+  file:close()
+
+  local ok, data = pcall(vim.fn.json_decode, content)
+  if not ok or not data then
+    return nil, 'Failed to parse bible-data.json'
+  end
+
+  bible_data = data
+  return bible_data
+end
+
+-- Function to get chapter info from JSON data
+local function get_chapter_info(book_name, chapter_num)
   local c_id = get_book_id(book_name)
   if not c_id then
     return nil, 'Book not found: ' .. book_name
   end
 
-  -- Check cache first
-  local cache_key = c_id .. '_' .. chapter_num
-  if chapter_cache[cache_key] then
-    return chapter_cache[cache_key]
+  -- Load Bible data
+  local data, err = load_bible_data()
+  if not data then
+    return nil, err
   end
 
   -- Calculate book number from c_id
-  local book_number = c_id - 1001070104
+  local book_number = tostring(c_id - 1001070104)
+  local chapter_str = tostring(chapter_num)
 
-  -- Construct chapter URL
-  local url = string.format('https://wol.jw.org/en/wol/b/r1/lp-e/nwtsty/%d/%s', book_number, chapter_num)
-
-  -- Fetch the page using curl
-  local curl_cmd = string.format('curl -s "%s"', url)
-  local html = vim.fn.system(curl_cmd)
-
-  if vim.v.shell_error ~= 0 then
-    return nil, 'Failed to fetch chapter data from JW.org'
+  -- Look up in data
+  if not data[book_number] then
+    return nil, 'Book ' .. book_number .. ' not found in data'
   end
 
-  -- Extract verse IDs from links
-  -- Pattern: /en/wol/dx/r1/lp-e/{c_id}/{v_id}
-  local verse_ids = {}
-  for v_id in html:gmatch('/en/wol/dx/r1/lp%-e/' .. c_id .. '/(%d+)') do
-    table.insert(verse_ids, tonumber(v_id))
+  if not data[book_number][chapter_str] then
+    return nil, 'Chapter ' .. chapter_str .. ' not found in book ' .. book_number
   end
 
-  if #verse_ids == 0 then
-    return nil, 'No verses found in chapter'
-  end
-
-  -- Sort to get the first verse ID
-  table.sort(verse_ids)
-
-  local result = {
-    count = #verse_ids,
-    first_verse_id = verse_ids[1]
-  }
-
-  -- Cache the result
-  chapter_cache[cache_key] = result
-
-  return result
+  return data[book_number][chapter_str]
 end
 
 -- Function to generate the numbered links
@@ -224,24 +223,22 @@ local function generate_numbered_links()
   end
   local x = vim.fn.input 'Enter chapter number: '
 
-  -- Scrape chapter info
-  vim.notify('Fetching chapter info from JW.org...', vim.log.levels.INFO)
-  local chapter_info, err = scrape_chapter_info(book_name, x)
+  -- Get chapter info from JSON data
+  local chapter_info, err = get_chapter_info(book_name, x)
 
   if not chapter_info then
-    vim.notify(err or 'Failed to scrape chapter info', vim.log.levels.ERROR)
+    vim.notify(err or 'Failed to get chapter info', vim.log.levels.ERROR)
     return
   end
 
-  -- Show scraped values and allow override
-  local count_default = tostring(chapter_info.count)
-  local v_id_default = tostring(chapter_info.first_verse_id)
+  -- Use data directly from JSON
+  local count = chapter_info.count
+  local v_id = chapter_info.first_verse_id
 
-  local count_input = vim.fn.input('Enter number of verses [' .. count_default .. ']: ')
-  local count = tonumber(count_input ~= '' and count_input or count_default)
-
-  local v_id_input = vim.fn.input('Enter the initial verse ID [' .. v_id_default .. ']: ')
-  local v_id = tonumber(v_id_input ~= '' and v_id_input or v_id_default)
+  vim.notify(
+    string.format('Generating %d verses starting from ID %d', count, v_id),
+    vim.log.levels.INFO
+  )
 
   -- Get current cursor position
   local row = vim.api.nvim_win_get_cursor(0)[1]

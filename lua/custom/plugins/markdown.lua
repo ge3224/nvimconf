@@ -3,6 +3,9 @@ return {
     'obsidian-nvim/obsidian.nvim',
     version = '*',
     ft = 'markdown',
+    keys = {
+      { '<leader>nt', '<cmd>Obsidian today<CR>', desc = 'Open today\'s note' },
+    },
     config = function()
       require('obsidian').setup({
         workspaces = {
@@ -72,7 +75,6 @@ return {
           vim.keymap.set('n', 'gf', '<cmd>Obsidian follow_link<CR>', { desc = 'Follow obsidian link', buffer = true })
 
           vim.keymap.set('n', '<leader>nn', ':Obsidian new<CR>', { desc = 'Create new note', buffer = true })
-          vim.keymap.set('n', '<leader>nt', ':Obsidian today<CR>', { desc = 'Open today\'s note', buffer = true })
 
           -- Visual mode keymaps
           vim.keymap.set('v', '<leader>ne', ':Obsidian extract_note<CR>', { desc = 'Extract selection to new note', buffer = true })

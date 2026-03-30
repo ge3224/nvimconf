@@ -526,15 +526,14 @@ require('lazy').setup({
         pattern = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
         group = vim.api.nvim_create_augroup('kickstart-ts-ls-attach', { clear = true }),
         callback = function(event)
-          local util = require 'lspconfig.util'
-          local root_dir = util.root_pattern('deno.json', 'deno.jsonc')(vim.api.nvim_buf_get_name(event.buf))
+          local root_dir = vim.fs.root(event.buf, { 'deno.json', 'deno.jsonc' })
           if root_dir then
             vim.lsp.start { name = 'denols', cmd = { 'deno', 'lsp' }, root_dir = root_dir }
           else
             vim.lsp.start {
               name = 'ts_ls',
               cmd = { 'typescript-language-server', '--stdio' },
-              root_dir = util.root_pattern('package.json', 'tsconfig.json')(vim.api.nvim_buf_get_name(event.buf)),
+              root_dir = vim.fs.root(event.buf, { 'package.json', 'tsconfig.json' }),
             }
           end
         end,
@@ -693,7 +692,15 @@ require('lazy').setup({
         clangd = {},
         gopls = {},
         pyright = {},
-        rust_analyzer = {},
+        rust_analyzer = {
+          settings = {
+            ['rust-analyzer'] = {
+              cargo = {
+                features = 'all',
+              },
+            },
+          },
+        },
         zls = {},
 
         -- These are listed here for installation but excluded from automatic setup
@@ -716,6 +723,11 @@ require('lazy').setup({
           },
         },
       }
+
+      for server_name, server in pairs(servers) do
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+        vim.lsp.config(server_name, server)
+      end
 
       -- Ensure the servers and tools above are installed
       --
@@ -740,16 +752,6 @@ require('lazy').setup({
         ensure_installed = vim.tbl_keys(servers), -- Install all servers in the servers table
         automatic_enable = {
           exclude = { 'ts_ls', 'denols' }, -- Exclude these from automatic setup
-        },
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
         },
       }
     end,
@@ -959,20 +961,20 @@ require('lazy').setup({
       -- - gsF)  - Find previous ) surrounding
       -- - gsh)  - Highlight ) surrounding
       -- - gsn   - Update search lines config
-      require('mini.surround').setup({
+      require('mini.surround').setup {
         mappings = {
-          add = 'ys',            -- Add surrounding in Normal and Visual modes
-          delete = 'ds',         -- Delete surrounding
-          find = 'gsf',          -- Find surrounding (to the right)
-          find_left = 'gsF',     -- Find surrounding (to the left)
-          highlight = 'gsh',     -- Highlight surrounding
-          replace = 'cs',        -- Replace surrounding
+          add = 'ys', -- Add surrounding in Normal and Visual modes
+          delete = 'ds', -- Delete surrounding
+          find = 'gsf', -- Find surrounding (to the right)
+          find_left = 'gsF', -- Find surrounding (to the left)
+          highlight = 'gsh', -- Highlight surrounding
+          replace = 'cs', -- Replace surrounding
           update_n_lines = 'gsn', -- Update `n_lines`
 
-          suffix_last = 'l',     -- Suffix to search with "prev" method
-          suffix_next = 'n',     -- Suffix to search with "next" method
+          suffix_last = 'l', -- Suffix to search with "prev" method
+          suffix_next = 'n', -- Suffix to search with "next" method
         },
-      })
+      }
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,

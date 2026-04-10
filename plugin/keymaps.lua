@@ -23,3 +23,5 @@ vim.keymap.set('n', '<leader>yl', function()
   vim.fn.setreg('+', position)
   vim.notify('Copied: ' .. position, vim.log.levels.INFO)
 end, { desc = 'Copy cursor position to clipboard' })
+
+vim.keymap.set('n', '<leader>tt', '<cmd>60vnew +terminal<CR>', { desc = 'Open terminal in 60-column vertical split' })

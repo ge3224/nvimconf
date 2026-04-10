@@ -4,10 +4,10 @@ return {
     version = '*',
     ft = 'markdown',
     keys = {
-      { '<leader>nt', '<cmd>Obsidian today<CR>', desc = 'Open today\'s note' },
+      { '<leader>nt', '<cmd>Obsidian today<CR>', desc = "Open today's note" },
     },
     config = function()
-      require('obsidian').setup({
+      require('obsidian').setup {
         workspaces = {
           {
             name = 'personal',
@@ -20,14 +20,16 @@ return {
         legacy_commands = false,
         daily_notes = {
           folder = 'resources/daily',
+          -- template = 'resources/templates/daily-note.md',
+          template = vim.fn.expand '~/vault' .. '/resources/templates/daily-note.md',
         },
-      })
+      }
 
       -- Disable default <CR> keymap
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "ObsidianNoteEnter",
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'ObsidianNoteEnter',
         callback = function(ev)
-          vim.keymap.del("n", "<CR>", { buffer = ev.buf })
+          vim.keymap.del('n', '<CR>', { buffer = ev.buf })
         end,
       })
     end,

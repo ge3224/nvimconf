@@ -33,6 +33,30 @@ For the original kickstart.nvim installation instructions, see: https://github.c
 
 Standard Neovim usage with enhanced functionality through custom plugins and keybindings. Key additions include file navigation tools, productivity enhancements, database interfaces, and AI-assisted coding.
 
+## Tree-sitter Parsers
+
+This configuration uses Neovim's built-in treesitter support instead of the nvim-treesitter plugin. Parsers are compiled manually and placed in `~/.local/share/nvim/site/parser/`.
+
+### Bundled with Neovim
+
+C, Lua, Markdown, Vim, Vimdoc, and Query parsers ship with Neovim 0.12+ and require no installation.
+
+### Compiling a parser
+
+Clone the grammar repo, compile the C source, and copy the `.so`:
+
+```bash
+git clone https://github.com/tree-sitter-grammars/tree-sitter-<lang> /tmp/tree-sitter-<lang>
+cc -shared -fPIC -o ~/.local/share/nvim/site/parser/<lang>.so \
+  -I /tmp/tree-sitter-<lang>/src \
+  /tmp/tree-sitter-<lang>/src/parser.c \
+  /tmp/tree-sitter-<lang>/src/scanner.c
+```
+
+Drop `scanner.c` if the grammar doesn't have one.
+
+Some grammars have non-standard source layouts (e.g. tree-sitter-typescript has `typescript/src/` and `tsx/src/` subdirectories).
+
 ## Upstream
 
 Based on [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim) - a starting point for Neovim configuration that is small, single-file, and completely documented.

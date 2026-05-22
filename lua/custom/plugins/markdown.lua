@@ -18,10 +18,12 @@ return {
           enable = false,
         },
         legacy_commands = false,
+        templates = {
+          folder = 'resources/templates',
+        },
         daily_notes = {
           folder = 'resources/daily',
-          -- template = 'resources/templates/daily-note.md',
-          template = vim.fn.expand '~/vault' .. '/resources/templates/daily-note.md',
+          template = 'daily-note.md',
         },
       }
 

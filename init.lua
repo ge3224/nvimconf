@@ -617,6 +617,7 @@ require('lazy').setup({
             },
           },
         },
+        ols = {},
         zls = {},
 
         -- These are listed here for installation but excluded from automatic setup
@@ -703,8 +704,16 @@ require('lazy').setup({
           }
         end
       end,
+      formatters = {
+        odinfmt = {
+          command = 'odinfmt',
+          args = { '-stdin' },
+          stdin = true,
+        },
+      },
       formatters_by_ft = {
         lua = { 'stylua' },
+        odin = { 'odinfmt' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -912,25 +921,23 @@ require('lazy').setup({
     end,
   },
 
-  -- TODO: delete the following block
-  -- { -- Highlight, edit, and navigate code
-  --   'nvim-treesitter/nvim-treesitter',
-  --   build = ':TSUpdate',
-  --   -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-  --   config = function()
-  --     ---@diagnostic disable-next-line: missing-fields
-  --     require('nvim-treesitter').setup()
-  --
-  --     local ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'zig' }
-  --     require('nvim-treesitter').install(ensure_installed)
-  --   end,
-  --   -- There are additional nvim-treesitter modules that you can use to interact
-  --   -- with nvim-treesitter. You should go explore a few and see what interests you:
+  { -- Highlight, edit, and navigate code
+    'nvim-treesitter/nvim-treesitter',
+    build = ':TSUpdate',
+    -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
+    config = function()
+      ---@diagnostic disable-next-line: missing-fields
+      require('nvim-treesitter').setup {
+        ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'zig', 'odin' },
+      }
+    end,
+    -- There are additional nvim-treesitter modules that you can use to interact
+    -- with nvim-treesitter. You should go explore a few and see what interests you:
   --   --
   --   --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
   --   --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
   --   --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
-  -- },
+  },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and

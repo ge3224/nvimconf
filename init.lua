@@ -619,6 +619,14 @@ require('lazy').setup({
         },
         ols = {},
         zls = {},
+        tailwindcss = {
+          settings = {
+            tailwindCSS = {
+              classFunctions = { 'clsx', 'cva', 'cx' },
+              colorDecorators = false,
+            },
+          },
+        },
 
         -- These are listed here for installation but excluded from automatic setup
         -- They're handled by the FileType autocmd below
@@ -933,10 +941,10 @@ require('lazy').setup({
     end,
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
-  --   --
-  --   --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-  --   --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-  --   --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+    --   --
+    --   --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
+    --   --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
+    --   --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the

@@ -591,7 +591,6 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- Enable these language servers with automatic setup
         clangd = {},
         gopls = {},
         pyright = {},
@@ -614,12 +613,6 @@ require('lazy').setup({
             },
           },
         },
-
-        -- These are listed here for installation but excluded from automatic setup
-        -- They're handled by the FileType autocmd below
-        ts_ls = {},
-        denols = {},
-
         lua_ls = {
           -- cmd = { ... },
           -- filetypes = { ... },
@@ -636,6 +629,10 @@ require('lazy').setup({
         },
       }
 
+      -- Installed by Mason, but started by the FileType autocmd above rather
+      -- than enabled automatically (deno vs. node is decided per-project).
+      local manual_servers = { 'ts_ls', 'denols' }
+
       -- Ensure the servers and tools above are installed
       --
       -- To check the current status of installed tools and/or manually install
@@ -649,7 +646,8 @@ require('lazy').setup({
       --
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
-      local ensure_installed = vim.tbl_keys(servers or {})
+      local ensure_installed = vim.tbl_keys(servers)
+      vim.list_extend(ensure_installed, manual_servers)
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
       })
@@ -660,10 +658,8 @@ require('lazy').setup({
       end
 
       require('mason-lspconfig').setup {
-        ensure_installed = vim.tbl_keys(servers), -- Install all servers in the servers table
-        automatic_enable = {
-          exclude = { 'ts_ls', 'denols' }, -- Exclude these from automatic setup
-        },
+        -- Exclude these from automatic setup
+        automatic_enable = { exclude = manual_servers },
       }
     end,
   },

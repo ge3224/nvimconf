@@ -579,7 +579,7 @@ require('lazy').setup({
       --  By default, Neovim doesn't support everything that is in the LSP specification.
       --  When you add blink.cmp, luasnip, etc. Neovim now has *more* capabilities.
       --  So, we create new capabilities with blink.cmp, and then broadcast that to the servers.
-      local capabilities = require('blink.cmp').get_lsp_capabilities()
+      vim.lsp.config('*', { capabilities = require('blink.cmp').get_lsp_capabilities() })
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -637,7 +637,6 @@ require('lazy').setup({
       }
 
       for server_name, server in pairs(servers) do
-        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
         vim.lsp.config(server_name, server)
       end
 
